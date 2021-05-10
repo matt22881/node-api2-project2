@@ -40,7 +40,7 @@ describe('server.js', () => {
       await db('posts').insert(post2)
       res = await request(server).get('/api/posts')
       expect(res.body).toHaveLength(2)
-    }, 500)
+    }, 5000)
     it('can get all the correct posts', async () => {
       await db('posts').insert(post1)
       await db('posts').insert(post2)
@@ -49,7 +49,7 @@ describe('server.js', () => {
       expect(res.body[0]).toMatchObject(post1)
       expect(res.body[1]).toHaveProperty('id')
       expect(res.body[1]).toMatchObject(post2)
-    }, 500)
+    }, 5000)
   })
   describe('2 [GET] /api/posts/:id', () => {
     it('can get all the correct posts by id', async () => {
@@ -61,18 +61,18 @@ describe('server.js', () => {
       res = await request(server).get('/api/posts/2')
       expect(res.body).toHaveProperty('id')
       expect(res.body).toMatchObject(post2)
-    }, 500)
+    }, 5000)
     it('reponds with a 404 if the post is not found', async () => {
       let res = await request(server).get('/api/posts/111')
       expect(res.status).toBe(404)
       expect(res.body.message).toMatch(/does not exist/i)
-    }, 500)
+    }, 5000)
   })
   describe('3 [POST] /api/posts', () => {
     it('responds with a 201', async () => {
       const res = await request(server).post('/api/posts').send(post1)
       expect(res.status).toBe(201)
-    }, 500)
+    }, 5000)
     it('responds with a new post', async () => {
       let res = await request(server).post('/api/posts').send(post1)
       expect(res.body).toHaveProperty('id')
@@ -80,13 +80,13 @@ describe('server.js', () => {
       res = await request(server).post('/api/posts').send(post2)
       expect(res.body).toHaveProperty('id')
       expect(res.body).toMatchObject(post2)
-    }, 500)
+    }, 5000)
     it('on missing title or contents responds with a 400', async () => {
       let res = await request(server).post('/api/posts').send({ title: 'foo' })
       expect(res.status).toBe(400)
       res = await request(server).post('/api/posts').send({ contents: 'bar' })
       expect(res.status).toBe(400)
-    }, 500)
+    }, 5000)
   })
   describe('4 [PUT] /api/posts/:id', () => {
     it('responds with updated user', async () => {
@@ -94,20 +94,20 @@ describe('server.js', () => {
       const updates = { title: 'xxx', contents: 'yyy' }
       const res = await request(server).put(`/api/posts/${id}`).send(updates)
       expect(res.body).toMatchObject({ id, ...updates })
-    }, 500)
+    }, 5000)
     it('saves the updated user to the db', async () => {
       const [id] = await db('posts').insert(post2)
       const updates = { title: 'aaa', contents: 'bbb' }
       await request(server).put(`/api/posts/${id}`).send(updates)
       let user = await db('posts').where({ id }).first()
       expect(user).toMatchObject({ id, ...updates })
-    }, 500)
+    }, 5000)
     it('responds with the correct message & status code on bad id', async () => {
       const updates = { title: 'xxx', contents: 'yyy' }
       const res = await request(server).put('/api/posts/foobar').send(updates)
       expect(res.status).toBe(404)
       expect(res.body.message).toMatch(/does not exist/i)
-    }, 500)
+    }, 5000)
     it('responds with the correct message & status code on validation problem', async () => {
       const [id] = await db('posts').insert(post2)
       let updates = { title: 'xxx' }
@@ -122,20 +122,20 @@ describe('server.js', () => {
       res = await request(server).put(`/api/posts/${id}`).send(updates)
       expect(res.status).toBe(400)
       expect(res.body.message).toMatch(/provide title and contents/i)
-    }, 500)
+    }, 5000)
   })
   describe('5 [DELETE] /api/posts/:id', () => {
     it('reponds with a 404 if the post is not found', async () => {
       let res = await request(server).delete('/api/posts/111')
       expect(res.status).toBe(404)
       expect(res.body.message).toMatch(/does not exist/i)
-    }, 500)
+    }, 5000)
     it('reponds with the complete deleted post', async () => {
       await db('posts').insert(post1)
       let res = await request(server).delete('/api/posts/1')
       expect(res.body).toHaveProperty('id')
       expect(res.body).toMatchObject(post1)
-    }, 500)
+    }, 5000)
     it('removes the deleted post from the database', async () => {
       const [id] = await db('posts').insert(post2)
       let post = await db('posts').where({ id }).first()
@@ -143,14 +143,14 @@ describe('server.js', () => {
       await request(server).delete('/api/posts/' + id)
       post = await db('posts').where({ id }).first()
       expect(post).toBeFalsy()
-    }, 500)
+    }, 5000)
   })
   describe('6 [GET] /api/posts/:id/comments', () => {
     it('reponds with a 404 if the post is not found', async () => {
       let res = await request(server).get('/api/posts/66/comments')
       expect(res.status).toBe(404)
       expect(res.body.message).toMatch(/does not exist/i)
-    }, 500)
+    }, 5000)
     it('can get all the comments associated to the posts with given id', async () => {
       await db('posts').insert(post1)
       await db('posts').insert(post2)
